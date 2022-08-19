@@ -1,0 +1,43 @@
+"use strict";
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var proxyHeaders_exports = {};
+__export(proxyHeaders_exports, {
+  proxyHeaders: () => proxyHeaders
+});
+module.exports = __toCommonJS(proxyHeaders_exports);
+function getProperty(target, prop) {
+  if (typeof prop !== "string") {
+    return target[prop];
+  }
+  for (const [name, value] of Object.entries(target)) {
+    if (prop.toLowerCase() === name.toLowerCase()) {
+      return value;
+    }
+  }
+  return void 0;
+}
+const proxyHeaders = (target) => new Proxy(target, {
+  get: (target2, prop) => getProperty(target2, prop),
+  has: (target2, prop) => getProperty(target2, prop) !== void 0
+});
+// Annotate the CommonJS export names for ESM import in node:
+0 && (module.exports = {
+  proxyHeaders
+});
+//# sourceMappingURL=proxyHeaders.js.map

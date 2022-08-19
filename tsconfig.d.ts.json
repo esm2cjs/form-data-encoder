@@ -2,7 +2,7 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "declaration": true,
-    "declarationDir": "./@type",
+    "declarationDir": "build/esm",
     "removeComments": false,
     "emitDeclarationOnly": true
   }
