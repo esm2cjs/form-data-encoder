@@ -23,7 +23,7 @@ __export(isFile_exports, {
 });
 module.exports = __toCommonJS(isFile_exports);
 var import_isFunction = require("./isFunction.js");
-const isFile = (value) => Boolean(value && typeof value === "object" && (0, import_isFunction.isFunction)(value.constructor) && value[Symbol.toStringTag] === "File" && (0, import_isFunction.isFunction)(value.stream) && value.name != null && value.size != null && value.lastModified != null);
+const isFile = (value) => Boolean(value && typeof value === "object" && (0, import_isFunction.isFunction)(value.constructor) && value[Symbol.toStringTag] === "File" && (0, import_isFunction.isFunction)(value.stream) && value.name != null);
 const isFileLike = isFile;
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {

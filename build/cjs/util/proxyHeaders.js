@@ -32,9 +32,9 @@ function getProperty(target, prop) {
   }
   return void 0;
 }
-const proxyHeaders = (target) => new Proxy(target, {
-  get: (target2, prop) => getProperty(target2, prop),
-  has: (target2, prop) => getProperty(target2, prop) !== void 0
+const proxyHeaders = (object) => new Proxy(object, {
+  get: (target, prop) => getProperty(target, prop),
+  has: (target, prop) => getProperty(target, prop) !== void 0
 });
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {

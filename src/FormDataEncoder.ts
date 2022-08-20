@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-globals */
 import type {LowercaseObjectKeys} from "./util/LowercaseObjectKeys.js"
 import {createBoundary} from "./util/createBoundary.js"
 import {normalizeValue} from "./util/normalizeValue.js"
@@ -11,14 +12,14 @@ import {isFile} from "./util/isFile.js"
 
 type FormDataEntryValue = string | FileLike
 
-type RawHeaders = Readonly<{
+interface RawHeaders {
   "Content-Type": string
-  "Content-Length": string
-}>
+  "Content-Length"?: string
+}
 
 export type FormDataEncoderHeaders =
-  & RawHeaders
-  & LowercaseObjectKeys<RawHeaders>
+  & Readonly<RawHeaders>
+  & Readonly<LowercaseObjectKeys<RawHeaders>>
 
 export interface FormDataEncoderOptions {
   /**
@@ -83,7 +84,7 @@ export class FormDataEncoder {
   /**
    * Returns Content-Length header
    */
-  readonly contentLength: string
+  readonly contentLength: string | undefined
 
   /**
    * Returns headers object with Content-Type and Content-Length header
@@ -174,12 +175,17 @@ export class FormDataEncoder {
       `${this.#DASHES}${this.boundary}${this.#DASHES}${this.#CRLF.repeat(2)}`
     )
 
-    this.contentLength = this.#getContentLength()
+    const headers: RawHeaders = {
+      "Content-Type": this.contentType
+    }
 
-    this.headers = proxyHeaders(Object.freeze({
-      "Content-Type": this.contentType,
-      "Content-Length": this.contentLength
-    }))
+    const contentLength = this.#getContentLength()
+    if (contentLength) {
+      this.contentLength = contentLength
+      headers["Content-Length"] = contentLength
+    }
+
+    this.headers = proxyHeaders(Object.freeze(headers))
 
     // Make sure following properties read-only in runtime.
     Object.defineProperties(this, {
@@ -201,7 +207,12 @@ export class FormDataEncoder {
       header += `Content-Type: ${value.type || "application/octet-stream"}`
     }
 
-    if (this.#options.enableAdditionalHeaders === true) {
+    const size = isFile(value) ? value.size : value.byteLength
+    if (
+      this.#options.enableAdditionalHeaders === true
+        && size != null
+        && !isNaN(size)
+    ) {
       header += `${this.#CRLF}Content-Length: ${
         isFile(value) ? value.size : value.byteLength
       }`
@@ -213,7 +224,7 @@ export class FormDataEncoder {
   /**
    * Returns form-data content length
    */
-  #getContentLength(): string {
+  #getContentLength(): string | undefined {
     let length = 0
 
     for (const [name, raw] of this.#form) {
@@ -221,9 +232,16 @@ export class FormDataEncoder {
         normalizeValue(raw)
       )
 
+      const size = isFile(value) ? value.size : value.byteLength
+
+      // Return `undefined` if encountered part without known size
+      if (size == null || isNaN(size)) {
+        return undefined
+      }
+
       length += this.#getFieldHeader(name, value).byteLength
 
-      length += isFile(value) ? value.size : value.byteLength
+      length += size
 
       length += this.#CRLF_BYTES_LENGTH
     }
@@ -236,8 +254,9 @@ export class FormDataEncoder {
    *
    * @deprecated Use FormDataEncoder.contentLength or FormDataEncoder.headers["Content-Length"] instead
    */
-  getContentLength(): number {
-    return Number(this.contentLength)
+  /* c8 ignore next 3 */
+  getContentLength(): number | undefined {
+    return this.contentLength == null ? undefined : Number(this.contentLength)
   }
 
   /**
