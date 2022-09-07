@@ -1,6 +1,6 @@
 {
   "name": "@esm2cjs/form-data-encoder",
-  "version": "2.1.0",
+  "version": "2.1.2",
   "description": "Encode FormData content into the multipart/form-data format. This is a fork of octet-stream/form-data-encoder, but with CommonJS support.",
   "repository": "esm2cjs/form-data-encoder",
   "sideEffects": false,
