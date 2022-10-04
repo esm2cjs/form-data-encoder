@@ -12,6 +12,6 @@ var __copyProps = (to, from, except, desc) => {
   return to;
 };
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
-var LowercaseObjectKeys_exports = {};
-module.exports = __toCommonJS(LowercaseObjectKeys_exports);
-//# sourceMappingURL=LowercaseObjectKeys.js.map
+var Headers_exports = {};
+module.exports = __toCommonJS(Headers_exports);
+//# sourceMappingURL=Headers.js.map

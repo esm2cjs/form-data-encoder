@@ -22,12 +22,11 @@ __export(proxyHeaders_exports, {
 });
 module.exports = __toCommonJS(proxyHeaders_exports);
 function getProperty(target, prop) {
-  if (typeof prop !== "string") {
-    return target[prop];
-  }
-  for (const [name, value] of Object.entries(target)) {
-    if (prop.toLowerCase() === name.toLowerCase()) {
-      return value;
+  if (typeof prop === "string") {
+    for (const [name, value] of Object.entries(target)) {
+      if (prop.toLowerCase() === name.toLowerCase()) {
+        return value;
+      }
     }
   }
   return void 0;
