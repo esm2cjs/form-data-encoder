@@ -1,5 +1,6 @@
 /* eslint-disable no-restricted-globals */
 import type {RawHeaders, FormDataEncoderHeaders} from "./util/Headers.js"
+import {getStreamIterator} from "./util/getStreamIterator.js"
 import {createBoundary} from "./util/createBoundary.js"
 import {normalizeValue} from "./util/normalizeValue.js"
 import {isPlainObject} from "./util/isPlainObject.js"
@@ -86,10 +87,10 @@ export class FormDataEncoder {
    * Creates a multipart/form-data encoder.
    *
    * @param form FormData object to encode. This object must be a spec-compatible FormData implementation.
-   * @param boundary An optional boundary string that will be used by the encoder. If there's no boundary string is present, Encoder will generate it automatically.
    *
    * @example
    *
+   * ```js
    * import {Readable} from "stream"
    *
    * import {FormData, File, fileFromPath} from "formdata-node"
@@ -114,9 +115,24 @@ export class FormDataEncoder {
    * const response = await fetch("https://httpbin.org/post", options)
    *
    * console.log(await response.json())
+   * ```
    */
   constructor(form: FormDataLike)
+
+  /**
+   * Creates multipart/form-data encoder with custom boundary string.
+   *
+   * @param form FormData object to encode. This object must be a spec-compatible FormData implementation.
+   * @param boundary An optional boundary string that will be used by the encoder. If there's no boundary string is present, Encoder will generate it automatically.
+   */
   constructor(form: FormDataLike, boundary: string)
+
+  /**
+   * Creates multipart/form-data encoder with additional options.
+   *
+   * @param form FormData object to encode. This object must be a spec-compatible FormData implementation.
+   * @param options Additional options
+   */
   constructor(form: FormDataLike, options: FormDataEncoderOptions)
   constructor(
     form: FormDataLike,
@@ -336,7 +352,7 @@ export class FormDataEncoder {
   async* encode(): AsyncGenerator<Uint8Array, void, undefined> {
     for (const part of this.values()) {
       if (isFile(part)) {
-        yield* part.stream()
+        yield* getStreamIterator(part.stream())
       } else {
         yield part
       }

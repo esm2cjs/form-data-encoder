@@ -21,6 +21,7 @@ __export(FormDataEncoder_exports, {
   FormDataEncoder: () => FormDataEncoder
 });
 module.exports = __toCommonJS(FormDataEncoder_exports);
+var import_getStreamIterator = require("./util/getStreamIterator.js");
 var import_createBoundary = require("./util/createBoundary.js");
 var import_normalizeValue = require("./util/normalizeValue.js");
 var import_isPlainObject = require("./util/isPlainObject.js");
@@ -116,7 +117,7 @@ class FormDataEncoder {
   async *encode() {
     for (const part of this.values()) {
       if ((0, import_isFile.isFile)(part)) {
-        yield* part.stream();
+        yield* (0, import_getStreamIterator.getStreamIterator)(part.stream());
       } else {
         yield part;
       }
