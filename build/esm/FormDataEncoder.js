@@ -18,6 +18,7 @@ import { proxyHeaders } from "./util/proxyHeaders.js";
 import { isFormData } from "./util/isFormData.js";
 import { escapeName } from "./util/escapeName.js";
 import { isFile } from "./util/isFile.js";
+import { chunk } from "./util/chunk.js";
 const defaultOptions = {
     enableAdditionalHeaders: false
 };
@@ -75,9 +76,6 @@ export class FormDataEncoder {
             headers: readonlyProp
         });
     }
-    getContentLength() {
-        return this.contentLength == null ? undefined : Number(this.contentLength);
-    }
     *values() {
         for (const [name, raw] of __classPrivateFieldGet(this, _FormDataEncoder_form, "f")) {
             const value = isFile(raw) ? raw : __classPrivateFieldGet(this, _FormDataEncoder_encoder, "f").encode(normalizeValue(raw));
@@ -93,7 +91,7 @@ export class FormDataEncoder {
                 yield* getStreamIterator(part.stream());
             }
             else {
-                yield part;
+                yield* chunk(part);
             }
         }
     }
@@ -105,11 +103,11 @@ export class FormDataEncoder {
             header += `; filename="${escapeName(value.name)}"${__classPrivateFieldGet(this, _FormDataEncoder_CRLF, "f")}`;
             header += `Content-Type: ${value.type || "application/octet-stream"}`;
         }
-        const size = isFile(value) ? value.size : value.byteLength;
-        if (__classPrivateFieldGet(this, _FormDataEncoder_options, "f").enableAdditionalHeaders === true
-            && size != null
-            && !isNaN(size)) {
-            header += `${__classPrivateFieldGet(this, _FormDataEncoder_CRLF, "f")}Content-Length: ${isFile(value) ? value.size : value.byteLength}`;
+        if (__classPrivateFieldGet(this, _FormDataEncoder_options, "f").enableAdditionalHeaders === true) {
+            const size = isFile(value) ? value.size : value.byteLength;
+            if (size != null && !isNaN(size)) {
+                header += `${__classPrivateFieldGet(this, _FormDataEncoder_CRLF, "f")}Content-Length: ${size}`;
+            }
         }
         return __classPrivateFieldGet(this, _FormDataEncoder_encoder, "f").encode(`${header}${__classPrivateFieldGet(this, _FormDataEncoder_CRLF, "f").repeat(2)}`);
     }, _FormDataEncoder_getContentLength = function _FormDataEncoder_getContentLength() {

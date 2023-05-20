@@ -29,6 +29,7 @@ var import_proxyHeaders = require("./util/proxyHeaders.js");
 var import_isFormData = require("./util/isFormData.js");
 var import_escapeName = require("./util/escapeName.js");
 var import_isFile = require("./util/isFile.js");
+var import_chunk = require("./util/chunk.js");
 var __classPrivateFieldSet = function(receiver, state, value, kind, f) {
   if (kind === "m")
     throw new TypeError("Private method is not writable");
@@ -102,9 +103,6 @@ class FormDataEncoder {
       headers: readonlyProp
     });
   }
-  getContentLength() {
-    return this.contentLength == null ? void 0 : Number(this.contentLength);
-  }
   *values() {
     for (const [name, raw] of __classPrivateFieldGet(this, _FormDataEncoder_form, "f")) {
       const value = (0, import_isFile.isFile)(raw) ? raw : __classPrivateFieldGet(this, _FormDataEncoder_encoder, "f").encode((0, import_normalizeValue.normalizeValue)(raw));
@@ -119,7 +117,7 @@ class FormDataEncoder {
       if ((0, import_isFile.isFile)(part)) {
         yield* (0, import_getStreamIterator.getStreamIterator)(part.stream());
       } else {
-        yield part;
+        yield* (0, import_chunk.chunk)(part);
       }
     }
   }
@@ -131,9 +129,11 @@ class FormDataEncoder {
       header += `; filename="${(0, import_escapeName.escapeName)(value.name)}"${__classPrivateFieldGet(this, _FormDataEncoder_CRLF, "f")}`;
       header += `Content-Type: ${value.type || "application/octet-stream"}`;
     }
-    const size = (0, import_isFile.isFile)(value) ? value.size : value.byteLength;
-    if (__classPrivateFieldGet(this, _FormDataEncoder_options, "f").enableAdditionalHeaders === true && size != null && !isNaN(size)) {
-      header += `${__classPrivateFieldGet(this, _FormDataEncoder_CRLF, "f")}Content-Length: ${(0, import_isFile.isFile)(value) ? value.size : value.byteLength}`;
+    if (__classPrivateFieldGet(this, _FormDataEncoder_options, "f").enableAdditionalHeaders === true) {
+      const size = (0, import_isFile.isFile)(value) ? value.size : value.byteLength;
+      if (size != null && !isNaN(size)) {
+        header += `${__classPrivateFieldGet(this, _FormDataEncoder_CRLF, "f")}Content-Length: ${size}`;
+      }
     }
     return __classPrivateFieldGet(this, _FormDataEncoder_encoder, "f").encode(`${header}${__classPrivateFieldGet(this, _FormDataEncoder_CRLF, "f").repeat(2)}`);
   }, _FormDataEncoder_getContentLength = function _FormDataEncoder_getContentLength2() {

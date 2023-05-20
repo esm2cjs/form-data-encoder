@@ -16,15 +16,29 @@ var __copyProps = (to, from, except, desc) => {
   return to;
 };
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
-var isFile_exports = {};
-__export(isFile_exports, {
-  isFile: () => isFile
+var chunk_exports = {};
+__export(chunk_exports, {
+  MAX_CHUNK_SIZE: () => MAX_CHUNK_SIZE,
+  chunk: () => chunk
 });
-module.exports = __toCommonJS(isFile_exports);
-var import_isFunction = require("./isFunction.js");
-const isFile = (value) => Boolean(value && typeof value === "object" && (0, import_isFunction.isFunction)(value.constructor) && value[Symbol.toStringTag] === "File" && (0, import_isFunction.isFunction)(value.stream) && value.name != null);
+module.exports = __toCommonJS(chunk_exports);
+const MAX_CHUNK_SIZE = 65536;
+function* chunk(value) {
+  if (value.byteLength <= MAX_CHUNK_SIZE) {
+    yield value;
+    return;
+  }
+  let offset = 0;
+  while (offset < value.byteLength) {
+    const size = Math.min(value.byteLength - offset, MAX_CHUNK_SIZE);
+    const buffer = value.buffer.slice(offset, offset + size);
+    offset += buffer.byteLength;
+    yield new Uint8Array(buffer);
+  }
+}
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
-  isFile
+  MAX_CHUNK_SIZE,
+  chunk
 });
-//# sourceMappingURL=isFile.js.map
+//# sourceMappingURL=chunk.js.map

@@ -1,4 +1,5 @@
 /* eslint-disable no-restricted-globals */
+
 import type {RawHeaders, FormDataEncoderHeaders} from "./util/Headers.js"
 import {getStreamIterator} from "./util/getStreamIterator.js"
 import {createBoundary} from "./util/createBoundary.js"
@@ -10,6 +11,7 @@ import {isFormData} from "./util/isFormData.js"
 import {escapeName} from "./util/escapeName.js"
 import type {FileLike} from "./FileLike.js"
 import {isFile} from "./util/isFile.js"
+import {chunk} from "./util/chunk.js"
 
 type FormDataEntryValue = string | FileLike
 
@@ -214,15 +216,11 @@ export class FormDataEncoder {
       header += `Content-Type: ${value.type || "application/octet-stream"}`
     }
 
-    const size = isFile(value) ? value.size : value.byteLength
-    if (
-      this.#options.enableAdditionalHeaders === true
-        && size != null
-        && !isNaN(size)
-    ) {
-      header += `${this.#CRLF}Content-Length: ${
-        isFile(value) ? value.size : value.byteLength
-      }`
+    if (this.#options.enableAdditionalHeaders === true) {
+      const size = isFile(value) ? value.size : value.byteLength
+      if (size != null && !isNaN(size)) {
+        header += `${this.#CRLF}Content-Length: ${size}`
+      }
     }
 
     return this.#encoder.encode(`${header}${this.#CRLF.repeat(2)}`)
@@ -257,23 +255,14 @@ export class FormDataEncoder {
   }
 
   /**
-   * Returns form-data content length
-   *
-   * @deprecated Use FormDataEncoder.contentLength or FormDataEncoder.headers["Content-Length"] instead
-   */
-  /* c8 ignore next 3 */
-  getContentLength(): number | undefined {
-    return this.contentLength == null ? undefined : Number(this.contentLength)
-  }
-
-  /**
    * Creates an iterator allowing to go through form-data parts (with metadata).
-   * This method **will not** read the files.
+   * This method **will not** read the files and **will not** split values big into smaller chunks.
    *
    * Using this method, you can convert form-data content into Blob:
    *
    * @example
    *
+   * ```ts
    * import {Readable} from "stream"
    *
    * import {FormDataEncoder} from "form-data-encoder"
@@ -301,6 +290,7 @@ export class FormDataEncoder {
    * const response = await fetch("https://httpbin.org/post", options)
    *
    * console.log(await response.json())
+   * ```
    */
   * values(): Generator<Uint8Array | FileLike, void, undefined> {
     for (const [name, raw] of this.#form) {
@@ -320,10 +310,11 @@ export class FormDataEncoder {
 
   /**
    * Creates an async iterator allowing to perform the encoding by portions.
-   * This method **will** also read files.
+   * This method reads through files and splits big values into smaller pieces (65536 bytes per each).
    *
    * @example
    *
+   * ```ts
    * import {Readable} from "stream"
    *
    * import {FormData, File, fileFromPath} from "formdata-node"
@@ -348,13 +339,14 @@ export class FormDataEncoder {
    * const response = await fetch("https://httpbin.org/post", options)
    *
    * console.log(await response.json())
+   * ```
    */
   async* encode(): AsyncGenerator<Uint8Array, void, undefined> {
     for (const part of this.values()) {
       if (isFile(part)) {
         yield* getStreamIterator(part.stream())
       } else {
-        yield part
+        yield* chunk(part)
       }
     }
   }

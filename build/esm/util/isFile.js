@@ -5,4 +5,3 @@ export const isFile = (value) => Boolean(value
     && value[Symbol.toStringTag] === "File"
     && isFunction(value.stream)
     && value.name != null);
-export const isFileLike = isFile;

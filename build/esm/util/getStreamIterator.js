@@ -1,5 +1,6 @@
+import { isAsyncIterable } from "./isAsyncIterable.js";
 import { isFunction } from "./isFunction.js";
-const isAsyncIterable = (value) => (isFunction(value[Symbol.asyncIterator]));
+import { chunk } from "./chunk.js";
 async function* readStream(readable) {
     const reader = readable.getReader();
     while (true) {
@@ -10,12 +11,17 @@ async function* readStream(readable) {
         yield value;
     }
 }
+async function* chunkStream(stream) {
+    for await (const value of stream) {
+        yield* chunk(value);
+    }
+}
 export const getStreamIterator = (source) => {
     if (isAsyncIterable(source)) {
-        return source;
+        return chunkStream(source);
     }
     if (isFunction(source.getReader)) {
-        return readStream(source);
+        return chunkStream(readStream(source));
     }
     throw new TypeError("Unsupported data source: Expected either ReadableStream or async iterable.");
 };

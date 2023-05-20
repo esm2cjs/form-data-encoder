@@ -10,7 +10,7 @@ import type { FileLike } from "../FileLike.js";
  *
  * This function will return `true` for FileAPI compatible `File` objects:
  *
- * ```
+ * ```ts
  * import {createReadStream} from "node:fs"
  *
  * import {isFile} from "form-data-encoder"
@@ -18,17 +18,14 @@ import type { FileLike } from "../FileLike.js";
  * isFile(new File(["Content"], "file.txt")) // -> true
  * ```
  *
- * However, if you pass a Node.js `Buffer` or `ReadStream`, it will return `false`:
+ * However, if you pass a Node.js `Buffer`, or `Blob`, or `ReadStream`, it will return `false`:
  *
  * ```js
  * import {isFile} from "form-data-encoder"
  *
  * isFile(Buffer.from("Content")) // -> false
+ * isFile(new Blob(["Content"])) // -> false
  * isFile(createReadStream("path/to/a/file.txt")) // -> false
  * ```
  */
 export declare const isFile: (value: unknown) => value is FileLike;
-/**
- * @deprecated use `isFile` instead
-  */
-export declare const isFileLike: (value: unknown) => value is FileLike;

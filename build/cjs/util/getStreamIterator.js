@@ -21,8 +21,9 @@ __export(getStreamIterator_exports, {
   getStreamIterator: () => getStreamIterator
 });
 module.exports = __toCommonJS(getStreamIterator_exports);
+var import_isAsyncIterable = require("./isAsyncIterable.js");
 var import_isFunction = require("./isFunction.js");
-const isAsyncIterable = (value) => (0, import_isFunction.isFunction)(value[Symbol.asyncIterator]);
+var import_chunk = require("./chunk.js");
 async function* readStream(readable) {
   const reader = readable.getReader();
   while (true) {
@@ -33,12 +34,17 @@ async function* readStream(readable) {
     yield value;
   }
 }
+async function* chunkStream(stream) {
+  for await (const value of stream) {
+    yield* (0, import_chunk.chunk)(value);
+  }
+}
 const getStreamIterator = (source) => {
-  if (isAsyncIterable(source)) {
-    return source;
+  if ((0, import_isAsyncIterable.isAsyncIterable)(source)) {
+    return chunkStream(source);
   }
   if ((0, import_isFunction.isFunction)(source.getReader)) {
-    return readStream(source);
+    return chunkStream(readStream(source));
   }
   throw new TypeError("Unsupported data source: Expected either ReadableStream or async iterable.");
 };

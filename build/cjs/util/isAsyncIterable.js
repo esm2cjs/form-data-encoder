@@ -16,15 +16,15 @@ var __copyProps = (to, from, except, desc) => {
   return to;
 };
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
-var isFile_exports = {};
-__export(isFile_exports, {
-  isFile: () => isFile
+var isAsyncIterable_exports = {};
+__export(isAsyncIterable_exports, {
+  isAsyncIterable: () => isAsyncIterable
 });
-module.exports = __toCommonJS(isFile_exports);
+module.exports = __toCommonJS(isAsyncIterable_exports);
 var import_isFunction = require("./isFunction.js");
-const isFile = (value) => Boolean(value && typeof value === "object" && (0, import_isFunction.isFunction)(value.constructor) && value[Symbol.toStringTag] === "File" && (0, import_isFunction.isFunction)(value.stream) && value.name != null);
+const isAsyncIterable = (value) => (0, import_isFunction.isFunction)(value[Symbol.asyncIterator]);
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
-  isFile
+  isAsyncIterable
 });
-//# sourceMappingURL=isFile.js.map
+//# sourceMappingURL=isAsyncIterable.js.map
